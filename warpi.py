@@ -61,18 +61,21 @@ def save_dataset(cells, report):
   
   # insert wifi data
   for cell in cells:
-    print "INSERT INTO wifi_data VALUES (" + `insert_key` + ", \""  + `cell.ssid` + ", \""+ `cell.signal` + ", \""+ `cell.quality` + ", \""+ `cell.frequency` + ", \""+ `cell.bitrates` + ", \""+ `cell.encrypted` + ", \""+ cell.encryption_type + ", \""+ `cell.channel` + ", \""+ `cell.address` + ", \""+ `cell.mode` + ")"
+    bitrates_string = ""
+    for b in cell.bitrates:
+        bitrates_string += b
+        bitrates_string += " "
     c.execute("INSERT INTO wifi_data VALUES (" + `insert_key` + ", \"" 
-    + `cell.ssid` + ", \""
+    + cell.ssid + "\", "
     + `cell.signal` + ", \""
-    + `cell.quality` + ", \""
-    + `cell.frequency` + ", \""
-    + `cell.bitrates` + ", \""
-    + `cell.encrypted` + ", \""
-    + cell.encryption_type + ", \""
+    + cell.quality + "\", \""
+    + cell.frequency + "\", \""
+    + bitrates_string + "\", \""
+    + `cell.encrypted` + "\", \""
+    + cell.encryption_type + "\", "
     + `cell.channel` + ", \""
-    + `cell.address` + ", \""
-    + `cell.mode` + ")")
+    + cell.address + "\", \""
+    + cell.mode + "\")")
 
   # save db
   conn.commit()

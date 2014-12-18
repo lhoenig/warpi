@@ -14,7 +14,7 @@
         font-size: 10px;
         font-weight: normal;
         text-align: center;
-        width: 60px;     
+        width: 80;     
         border: 2px white;
         white-space: nowrap;
       }
@@ -35,34 +35,78 @@
             mapOptions);
         
         $.getJSON("wifi.json", function(wifi_json) {
-                    
           //console.log(wifi_json);
-          
-          for(var i in wifi_json) {
+          var ssid_to_index = { };
+
+          for (var i in wifi_json) {
             var centerPoint = new google.maps.LatLng(wifi_json[i].center_lat, wifi_json[i].center_lon)
             
-            var circleOptions = {
-              strokeColor: "#FF0000",
-              strokeOpacity: 0.8,
-              strokeWeight: 2,
-              fillColor: "#FF0000",
-              fillOpacity: 0.35,
-              map: map,
-              center: centerPoint,
-              radius: wifi_json[i].radius
-            };
-            var networkCircle = new google.maps.Circle(circleOptions);
+            if (wifi_json[i].encryption_type =="wpa2") {
+              var circleOptionsWPA = {
+                strokeColor: "#FF0000",
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+                fillColor: "#FF0000",
+                fillOpacity: 0.35,
+                map: map,
+                center: centerPoint,
+                radius: wifi_json[i].radius
+              };
+              var networkCircle = new google.maps.Circle(circleOptionsWPA);
+            } else if (wifi_json[i].encryption_type =="wep") {
+              var circleOptionsWEP = {
+                strokeColor: "#FFFF00",
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+                fillColor: "#FFFF00",
+                fillOpacity: 0.35,
+                map: map,
+                center: centerPoint,
+                radius: wifi_json[i].radius
+              };
+              var networkCircle = new google.maps.Circle(circleOptionsWEP);
+            } else {
+              var circleOptionsOpen = {
+                strokeColor: "#7DC410",
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+                fillColor: "#FFFF00",
+                fillOpacity: 0.35,
+                map: map,
+                center: centerPoint,
+                radius: wifi_json[i].radius
+              };
+              var networkCircle = new google.maps.Circle(circleOptionsOpen);
+            }
 
-            var networkLabel = new MarkerWithLabel({
-              position: centerPoint,
-              draggable: false,
-              raiseOnDrag: false,
-              map: map,
-              labelContent: wifi_json[i].ssid,
-              labelAnchor: new google.maps.Point(22, 0),
-              labelClass: "labels", // the CSS class for the label
-              labelStyle: {opacity: 0.75}
-            });
+            ssid_to_index[wifi_json[i].ssid] = i;
+            (function() {
+              var networkLabel = new MarkerWithLabel({
+                position: centerPoint,
+                draggable: false,
+                raiseOnDrag: false,
+                map: map,
+                labelContent: wifi_json[i].ssid,
+                labelAnchor: new google.maps.Point(45, 0),
+                labelClass: "labels",  // css class for label
+                labelStyle: {opacity: 0.75}
+              });
+            
+              google.maps.event.addListener(networkLabel, "click", function (e) { 
+                console.log("index of " + networkLabel.labelContent + " = " + ssid_to_index[networkLabel.labelContent]);
+                new google.maps.InfoWindow({
+                  content: "SSID: " + wifi_json[ssid_to_index[networkLabel.labelContent]].ssid + " " +
+                           "Max. Quality: " + wifi_json[ssid_to_index[networkLabel.labelContent]].max_quality + " " +
+                           "Frequency: " + wifi_json[ssid_to_index[networkLabel.labelContent]].frequency + " " +
+                           "Channel: " + wifi_json[ssid_to_index[networkLabel.labelContent]].channel + " " +
+                           "Address: " + wifi_json[ssid_to_index[networkLabel.labelContent]].address + " " +
+                           "Bitrates: " + wifi_json[ssid_to_index[networkLabel.labelContent]].bitrates + " " +
+                           "Encrypted: " + wifi_json[ssid_to_index[networkLabel.labelContent]].encrypted + " " + 
+                           "Encryption type: " + wifi_json[ssid_to_index[networkLabel.labelContent]].encryption_type,
+                  maxWidth: 130
+                }).open(map, this); 
+              });  
+            })();
           }
         });
       }
